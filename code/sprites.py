@@ -1,11 +1,14 @@
-import pygame 
+import pygame, os
 from settings import *
 from random import choice, randint
+
+# Get the directory where this script is located
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class BG(pygame.sprite.Sprite):
 	def __init__(self,groups,scale_factor):
 		super().__init__(groups)
-		bg_image = pygame.image.load('../graphics/environment/background.png').convert()
+		bg_image = pygame.image.load(os.path.join(BASE_DIR, 'graphics', 'environment', 'background.png')).convert()
 
 		full_height = bg_image.get_height() * scale_factor
 		full_width = bg_image.get_width() * scale_factor
@@ -30,7 +33,7 @@ class Ground(pygame.sprite.Sprite):
 		self.sprite_type = 'ground'
 		
 		# image
-		ground_surf = pygame.image.load('../graphics/environment/ground.png').convert_alpha()
+		ground_surf = pygame.image.load(os.path.join(BASE_DIR, 'graphics', 'environment', 'ground.png')).convert_alpha()
 		self.image = pygame.transform.scale(ground_surf,pygame.math.Vector2(ground_surf.get_size()) * scale_factor)
 		
 		# position
@@ -68,13 +71,13 @@ class Plane(pygame.sprite.Sprite):
 		self.mask = pygame.mask.from_surface(self.image)
 
 		# sound
-		self.jump_sound = pygame.mixer.Sound('../sounds/jump.wav')
+		self.jump_sound = pygame.mixer.Sound(os.path.join(BASE_DIR, 'sounds', 'jump.wav'))
 		self.jump_sound.set_volume(0.3)
 
 	def import_frames(self,scale_factor):
 		self.frames = []
 		for i in range(3):
-			surf = pygame.image.load(f'../graphics/plane/red{i}.png').convert_alpha()
+			surf = pygame.image.load(os.path.join(BASE_DIR, 'graphics', 'drone', f'drone{i}.png')).convert_alpha()
 			scaled_surface = pygame.transform.scale(surf,pygame.math.Vector2(surf.get_size())* scale_factor)
 			self.frames.append(scaled_surface)
 
@@ -109,7 +112,7 @@ class Obstacle(pygame.sprite.Sprite):
 		self.sprite_type = 'obstacle'
 
 		orientation = choice(('up','down'))
-		surf = pygame.image.load(f'../graphics/obstacles/{choice((0,1))}.png').convert_alpha()
+		surf = pygame.image.load(os.path.join(BASE_DIR, 'graphics', 'obstacles', f'{choice((0,1))}.png')).convert_alpha()
 		self.image = pygame.transform.scale(surf,pygame.math.Vector2(surf.get_size()) * scale_factor)
 		
 		x = WINDOW_WIDTH + randint(40,100)
