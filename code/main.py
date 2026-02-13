@@ -1,6 +1,9 @@
-import pygame, sys, time, random
+import pygame, sys, time, random, os
 from settings import *
 from sprites import BG, Ground, Plane, Obstacle
+
+# Get the directory where this script is located
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class Game:
 	def __init__(self):
@@ -8,16 +11,17 @@ class Game:
 		# setup
 		pygame.init()
 		self.display_surface = pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
-		pygame.display.set_caption('Flappy Bird')
+		pygame.display.set_caption('Botz - Drone')
 		self.clock = pygame.time.Clock()
-		self.active = True
+		self.active = False
+		self.game_started = False
 
 		# sprite groups
 		self.all_sprites = pygame.sprite.Group()
 		self.collision_sprites = pygame.sprite.Group()
 
 		# scale factor
-		bg_height = pygame.image.load('../graphics/environment/background.png').get_height()
+		bg_height = pygame.image.load(os.path.join(BASE_DIR, 'graphics', 'environment', 'background.png')).get_height()
 		self.scale_factor = WINDOW_HEIGHT / bg_height
 
 		# sprite setup 
@@ -30,8 +34,8 @@ class Game:
 		pygame.time.set_timer(self.obstacle_timer,1400)
 
 		# text
-		self.font = pygame.font.Font('../graphics/font/BD_Cartoon_Shout.ttf',30)
-		self.small_font = pygame.font.Font('../graphics/font/BD_Cartoon_Shout.ttf',20)
+		self.font = pygame.font.Font(os.path.join(BASE_DIR, 'graphics', 'font', 'BD_Cartoon_Shout.ttf'), 30)
+		self.small_font = pygame.font.Font(os.path.join(BASE_DIR, 'graphics', 'font', 'BD_Cartoon_Shout.ttf'), 20)
 		self.score = 0
 		self.accumulated_score = 0
 		self.current_session_score = 0
@@ -97,12 +101,17 @@ class Game:
 		random.shuffle(self.questions)
 
 		# menu
-		self.menu_surf = pygame.image.load('../graphics/ui/menu.png').convert_alpha()
+		self.menu_surf = pygame.image.load(os.path.join(BASE_DIR, 'graphics', 'ui', 'menu.png')).convert_alpha()
 		self.menu_rect = self.menu_surf.get_rect(midbottom = (WINDOW_WIDTH / 2, WINDOW_HEIGHT - 20))
 
 		# music 
-		self.music = pygame.mixer.Sound('../sounds/music.wav')
+		self.music = pygame.mixer.Sound(os.path.join(BASE_DIR, 'sounds', 'music.wav'))
 		self.music.play(loops = -1)
+
+		# start screen
+		self.start_button_rect = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT // 2 - 25, 200, 50)
+		self.restart_button_rect = pygame.Rect(WINDOW_WIDTH // 2 - 100, WINDOW_HEIGHT // 2 + 50, 200, 50)
+		self.button_font = pygame.font.Font(os.path.join(BASE_DIR, 'graphics', 'font', 'BD_Cartoon_Shout.ttf'), 24)
 
 	def collisions(self):
 		if pygame.sprite.spritecollide(self.plane,self.collision_sprites,False,pygame.sprite.collide_mask)\
@@ -116,17 +125,56 @@ class Game:
 			self.quiz_mode = True
 			self.plane.kill()
 
+	def display_start_screen(self):
+		# Dark green background
+		self.display_surface.fill((34, 139, 34))  # Dark green color
+		
+		# Title
+		title_text = self.font.render("BOTZ - FLAPPY DRONE", True, 'white')
+		title_rect = title_text.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT // 2 - 100))
+		self.display_surface.blit(title_text, title_rect)
+		
+		# Subtitle
+		subtitle_text = self.small_font.render("Archaeology Quiz Edition", True, 'white')
+		subtitle_rect = subtitle_text.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT // 2 - 60))
+		self.display_surface.blit(subtitle_text, subtitle_rect)
+		
+		# Start button background (darker green)
+		pygame.draw.rect(self.display_surface, (0, 100, 0), self.start_button_rect)
+		pygame.draw.rect(self.display_surface, 'white', self.start_button_rect, 3)  # White border
+		
+		# Start button text
+		button_text = self.button_font.render("START GAME", True, 'white')
+		button_text_rect = button_text.get_rect(center=self.start_button_rect.center)
+		self.display_surface.blit(button_text, button_text_rect)
+
 	def display_score(self):
+		# Display "TechtonicBotz" at the top
+		company_text = self.small_font.render("TechtonicBotz", True, 'brown')
+		company_rect = company_text.get_rect(center=(WINDOW_WIDTH / 2, 20))
+		self.display_surface.blit(company_text, company_rect)
+		
 		if self.active:
 			self.score = (pygame.time.get_ticks() - self.start_offset) // 1000 + self.accumulated_score
 			y = WINDOW_HEIGHT / 10
+			score_text = str(self.score)
 		else:
 			if self.quiz_mode:
 				self.display_quiz()
 				return
-			y = WINDOW_HEIGHT / 2 + (self.menu_rect.height / 1.5)
+			y = WINDOW_HEIGHT / 2 - 50
+			score_text = f"Your Score: {self.score}"
+			
+			# Display restart button
+			pygame.draw.rect(self.display_surface, (139, 69, 19), self.restart_button_rect)  # Saddle brown
+			pygame.draw.rect(self.display_surface, 'white', self.restart_button_rect, 3)  # White border
+			
+			# Restart button text
+			restart_text = self.button_font.render("RESTART!", True, 'white')
+			restart_text_rect = restart_text.get_rect(center=self.restart_button_rect.center)
+			self.display_surface.blit(restart_text, restart_text_rect)
 
-		score_surf = self.font.render(str(self.score),True,'black')
+		score_surf = self.font.render(score_text,True,'black')
 		score_rect = score_surf.get_rect(midtop = (WINDOW_WIDTH / 2,y))
 		self.display_surface.blit(score_surf,score_rect)
 		
@@ -216,7 +264,26 @@ class Game:
 			self.current_question = 0
 			self.quiz_mode = False
 			# Stay in game over state
-
+	def restart_game(self):
+		"""Reset the game to initial state"""
+		self.active = False
+		self.quiz_mode = False
+		self.score = 0
+		self.accumulated_score = 0
+		self.current_session_score = 0
+		self.current_question = 0
+		self.start_offset = 0
+		
+		# Clear sprites
+		for sprite in self.all_sprites:
+			sprite.kill()
+		
+		# Recreate sprites
+		BG(self.all_sprites,self.scale_factor)
+		Ground([self.all_sprites,self.collision_sprites],self.scale_factor)
+		
+		# Shuffle questions again
+		random.shuffle(self.questions)
 	def run(self):
 		last_time = time.time()
 		while True:
@@ -239,26 +306,41 @@ class Game:
 						elif event.key == pygame.K_3:
 							self.handle_quiz_answer(2)
 				if event.type == pygame.MOUSEBUTTONDOWN:
-					if self.active:
+					if not self.game_started:
+						# Check if start button was clicked
+						if self.start_button_rect.collidepoint(event.pos):
+							self.game_started = True
+							self.active = True
+							self.start_offset = pygame.time.get_ticks()
+					elif self.active:
 						self.plane.jump()
 					elif not self.quiz_mode:
-						self.plane = Plane(self.all_sprites,self.scale_factor / 1.7)
-						self.active = True
-						self.start_offset = pygame.time.get_ticks()
-
+					# Check if restart button was clicked
+						if self.restart_button_rect.collidepoint(event.pos):
+							self.restart_game()
+							self.plane = Plane(self.all_sprites,self.scale_factor / 1.7)
+							self.active = True
+							self.start_offset = pygame.time.get_ticks()
+						else:
+							self.plane = Plane(self.all_sprites,self.scale_factor / 1.7)
+							self.active = True
+							self.start_offset = pygame.time.get_ticks()
 				if event.type == self.obstacle_timer and self.active:
 					Obstacle([self.all_sprites,self.collision_sprites],self.scale_factor * 1.1)
 			
 			# game logic
-			self.display_surface.fill('black')
-			self.all_sprites.update(dt)
-			self.all_sprites.draw(self.display_surface)
-			self.display_score()
-
-			if self.active: 
-				self.collisions()
+			if not self.game_started:
+				self.display_start_screen()
 			else:
-				self.display_surface.blit(self.menu_surf,self.menu_rect)
+				self.display_surface.fill('black')
+				self.all_sprites.update(dt)
+				self.all_sprites.draw(self.display_surface)
+				self.display_score()
+
+				if self.active: 
+					self.collisions()
+				else:
+					self.display_surface.blit(self.menu_surf,self.menu_rect)
 
 			pygame.display.update()
 			# self.clock.tick(FRAMERATE)
