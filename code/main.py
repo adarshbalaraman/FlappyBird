@@ -3,8 +3,16 @@ from settings import *
 from sprites import BG, Ground, Plane, Obstacle
 
 # Get the directory where this script is located
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Get the directory where this script is located. If running from a PyInstaller
+# one-file bundle the files are extracted to a temporary folder available at
+# `sys._MEIPASS`.
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
 class Game:
 	def __init__(self):
 		

@@ -1,0 +1,54 @@
+🎮 FlappyBird Game
+
+QUICK START:
+• macOS: Double-click FlappyBird.app
+• Windows: Double-click FlappyBird.exe
+
+GAME CONTROLS:
+• SPACEBAR or CLICK: Make the bird fly
+• Avoid obstacles, collect points!
+
+SYSTEM REQUIREMENTS:
+• macOS 10.14+ OR Windows 10+ (64-bit)
+• 50 MB free space
+• No additional software needed
+
+SECURITY WARNINGS - NORMAL AND SAFE:
+
+🍎 macOS Error: "Cannot be opened because it is from an unidentified developer"
+SOLUTION: Right-click on FlappyBird.app → "Open" → "Open" 
+    OR run in Terminal: xattr -cr /path/to/FlappyBird.app
+
+🛡️ Windows Error: "Windows protected your PC"  
+SOLUTION: Click "More info" → "Run anyway"
+
+Why these warnings? This is an unsigned indie game. Signing certificates cost hundreds of dollars annually, so small developers often distribute unsigned apps. The warnings are just precautions - the game is safe to run.
+
+INSTALLATION:
+• No installation needed - just run the file!
+• macOS: Optionally drag FlappyBird.app to Applications folder
+• Windows: FlappyBird.exe can run from anywhere
+
+UNINSTALLING:
+• macOS: Drag FlappyBird.app to Trash
+• Windows: Delete FlappyBird.exe
+
+TROUBLESHOOTING:
+
+Game won't start:
+• Check system requirements above
+• Try running as administrator (Windows)
+• Check free disk space
+
+Game runs but no graphics:
+• Update graphics drivers
+• Try running in compatibility mode (Windows)
+
+Still have issues?
+• This is an open-source Python/Pygame project
+• Check GitHub issues or create a new one
+
+ENJOY THE GAME! 🚁
+
+Built with: Python • Pygame • PyInstaller
+Version: 1.0
